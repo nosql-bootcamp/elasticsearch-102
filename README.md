@@ -3,7 +3,7 @@
 ![elastic-logo](https://static-www.elastic.co/fr/assets/blteb1c97719574938d/logo-elastic-elasticsearch-lt.svg?q=700)
 
 **ElasticSearch 101** est un workshop permettant de découvrir le driver Node.js
-natif pour ElasticSearch.
+pour ElasticSearch.
 
 <a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/4.0/"><img alt="Creative Commons Licence" style="border-width:0" src="https://i.creativecommons.org/l/by-nc-sa/4.0/88x31.png" /></a>
 
