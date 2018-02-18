@@ -37,11 +37,9 @@ fs
 function createBulkInsertQuery(actors) {
   const body = actors.reduce((acc, actor) => {
     const { name, birth_date } = actor;
-    return [
-      ...acc,
-      { index: { _index: 'imdb', _type: 'actor', _id: actor.imdb_id } },
-      { name, birth_date }
-    ];
+    acc.push({ index: { _index: 'imdb', _type: 'actor', _id: actor.imdb_id } })
+    acc.push({ name, birth_date })
+    return acc
   }, []);
 
   return { body };

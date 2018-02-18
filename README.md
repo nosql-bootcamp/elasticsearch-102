@@ -125,11 +125,9 @@ fs
 function createBulkInsertQuery(actors) {
   const body = actors.reduce((acc, actor) => {
     const { name, birth_date } = actor;
-    return [
-      ...acc,
-      { index: { _index: 'imdb', _type: 'actor', _id: actor.imdb_id } },
-      { name, birth_date }
-    ];
+    acc.push({ index: { _index: 'imdb', _type: 'actor', _id: actor.imdb_id } })
+    acc.push({ name, birth_date })
+    return acc
   }, []);
 
   return { body };
@@ -191,21 +189,19 @@ function createBulkUpdateQuery(actors) {
       image,
       occupation
     } = actor;
-
-    return [
-      ...acc,
-      { update: { _index: 'imdb', _type: 'actor', _id: actor.id } },
-      {
-        doc: {
-          description: description.replace(
-            '                                See full bio &raquo;',
-            ''
-          ),
-          image,
-          occupation
-        }
+    acc.push({ update: { _index: 'imdb', _type: 'actor', _id: actor.id } })
+    acc.push({
+      doc: {
+        description: description.replace(
+          '                                See full bio &raquo;',
+          ''
+        ),
+        image,
+        occupation
       }
-    ];
+    })
+
+    return acc
   }, []);
 
   return { body };

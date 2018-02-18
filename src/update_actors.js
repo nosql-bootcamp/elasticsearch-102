@@ -32,21 +32,19 @@ function createBulkUpdateQuery(actors) {
       image,
       occupation
     } = actor;
-
-    return [
-      ...acc,
-      { update: { _index: 'imdb', _type: 'actor', _id: actor.id } },
-      {
-        doc: {
-          description: description.replace(
-            '                                See full bio &raquo;',
-            ''
-          ),
-          image,
-          occupation
-        }
+    acc.push({ update: { _index: 'imdb', _type: 'actor', _id: actor.id } })
+    acc.push({
+      doc: {
+        description: description.replace(
+          '                                See full bio &raquo;',
+          ''
+        ),
+        image,
+        occupation
       }
-    ];
+    })
+
+    return acc
   }, []);
 
   return { body };
