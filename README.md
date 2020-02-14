@@ -1,8 +1,8 @@
 # ElasticSearch 102
 
-![elastic-logo](https://static-www.elastic.co/fr/assets/blteb1c97719574938d/logo-elastic-elasticsearch-lt.svg?q=700)
+![elastic-logo](https://static-www.elastic.co/v3/assets/bltefdd0b53724fa2ce/blt6ae3d6980b5fd629/5bbca1d1af3a954c36f95ed3/logo-elastic.svg)
 
-**ElasticSearch 101** est un workshop permettant de découvrir le driver Node.js
+**ElasticSearch 102** est un workshop permettant de découvrir le driver Node.js
 pour ElasticSearch.
 
 <a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/4.0/"><img alt="Creative Commons Licence" style="border-width:0" src="https://i.creativecommons.org/l/by-nc-sa/4.0/88x31.png" /></a>
@@ -20,27 +20,23 @@ Nous considérons que vous avez déjà réalisé les workshops suivants :
 
 * [elasticsearch-101](https://github.com/nosql-bootcamp/elasticsearch-101)
 
-Vous allez également avoir besoin de [Node.js](https://nodejs.org). Si ce n'est
-pas déjà fait, [installez `node` et `npm`](https://nodejs.org/en/download/) sur
-votre machine.
+Vous allez également avoir besoin de [Node.js](https://nodejs.org). Si ce n'est pas déjà fait, [installez `node` et `npm`](https://nodejs.org/en/download/) sur votre machine.
 
-Vérifiez les versions installées de `node` (minimum `v9.x`) et `npm` (minimum
-`v5.x`) :
+Vérifiez les versions installées de `node` (minimum `v10.x`) et `npm` (minimum `v6.x`) :
 
 ```bash
 node -v
-v9.2.0
+v10.16.0
 ```
 
 ```bash
 npm -v
-5.5.1
+6.9.0
 ```
 
 ## Le jeu de données
 
-Le jeu de données utilisé pour le workshop est un ensemble d'actrices et
-d'acteurs, issus de la base [IMDb](http://www.imdb.com/).
+Le jeu de données utilisé pour le workshop est un ensemble d'actrices et d'acteurs, issus de la base [IMDb](http://www.imdb.com/).
 
 Plus précisément, deux fichiers nous servent de source de données :
 
@@ -56,22 +52,18 @@ Ces deux fichiers sont disponibles dans le dossier `src/data`.
 
 ## Driver natif ElasticSearch pour Node.js
 
-Les exemples de code du workshop se basent sur le
-[driver natif ElasticSearch pour Node.js](https://github.com/elastic/elasticsearch-js).
-La version utilisée est la
-[version 14.0.0](https://github.com/elastic/elasticsearch-js/tree/14.x).
+Les exemples de code du workshop se basent sur le [driver natif ElasticSearch pour Node.js](https://github.com/elastic/elasticsearch-js).
+La version utilisée est la [version 7.5.0](https://www.npmjs.com/package/@elastic/elasticsearch).
 
-L'avantage d'utiliser Node.js et le driver natif est que la syntaxe des requêtes
-du driver est quasiment identique à celles effectuées dans le shell.
+L'avantage d'utiliser Node.js et le driver natif est que la syntaxe des requêtes du driver est quasiment identique à celles effectuées dans le shell.
 
-La dépendance au driver elasticsearch est déjà présente dans le fichier
-`package.json`, ainsi que la dépendance au module `csv-parser` nécessaire pour
+La dépendance au driver elasticsearch est déjà présente dans le fichier `package.json`, ainsi que la dépendance au module `csv-parser` nécessaire pour
 la suite :
 
 ```json
 "dependencies": {
-  "csv-parser": "1.12.0",
-  "elasticsearch": "14.0.0"
+  "@elastic/elasticsearch": "^7.5.0",
+  "csv-parser": "^2.3.2"
 }
 ```
 
@@ -86,14 +78,11 @@ et sur
 qui va permettre l'insertion de tous les documents en un seul appel :
 
 ```javascript
-const elasticsearch = require('elasticsearch');
 const csv = require('csv-parser');
 const fs = require('fs');
+const { Client } = require('@elastic/elasticsearch');
 
-const client = new elasticsearch.Client({
-  host: 'localhost:9200',
-  log: 'info'
-});
+const client = new Client({ node: 'http://localhost:9200' });
 
 // Création de l'indice
 client.indices.create({ index: 'imdb' }, (err, resp) => {
@@ -116,7 +105,7 @@ fs
   .on('end', () => {
     client.bulk(createBulkInsertQuery(actors), (err, resp) => {
       if (err) console.trace(err.message);
-      else console.log(`Inserted ${resp.items.length} actors`);
+      else console.log(`Inserted ${resp.body.items.length} actors`);
       client.close();
     });
   });
@@ -125,7 +114,7 @@ fs
 function createBulkInsertQuery(actors) {
   const body = actors.reduce((acc, actor) => {
     const { name, birth_date } = actor;
-    acc.push({ index: { _index: 'imdb', _type: 'actor', _id: actor.imdb_id } })
+    acc.push({ index: { _index: 'imdb', _type: '_doc', _id: actor.imdb_id } })
     acc.push({ name, birth_date })
     return acc
   }, []);
@@ -155,13 +144,10 @@ collection `actors` à partir des données du fichier
 Pour cela, nous nous appuyons à nouveau sur l'api bulk.
 
 ```javascript
-const elasticsearch = require('elasticsearch');
 const fs = require('fs');
+const { Client } = require('@elastic/elasticsearch');
 
-const client = new elasticsearch.Client({
-  host: 'localhost:9200',
-  log: 'info'
-});
+const client = new Client({ node: 'http://localhost:9200' });
 
 fs.readFile(
   './data/Top_1000_Actors_and_Actresses.json',
@@ -176,7 +162,7 @@ fs.readFile(
 
     client.bulk(createBulkUpdateQuery(actorsToUpdate), (err, resp) => {
       if (err) console.trace(err.message);
-      else console.log(`Updated ${resp.items.length} actors`);
+      else console.log(`Updated ${resp.body.items.length} actors`);
       client.close();
     });
   }
@@ -189,7 +175,7 @@ function createBulkUpdateQuery(actors) {
       image,
       occupation
     } = actor;
-    acc.push({ update: { _index: 'imdb', _type: 'actor', _id: actor.id } })
+    acc.push({ update: { _index: 'imdb', _type: '_doc', _id: actor.id } })
     acc.push({
       doc: {
         description: description.replace(
@@ -230,13 +216,12 @@ Par exemple pour récupérer l'acteur le plus vieux du Top 1000 :
 client
   .search({
     index: 'imdb',
-    type: 'actor',
     body: {
       size: 1,
       sort: [{ birth_date: 'asc' }]
     }
   })
-  .then(resp => console.log(resp.hits.hits[0]._source.name));
+  .then(resp => console.log(resp.body.hits.hits[0]._source.name));
 ```
 
 Autre exemple pour compter le nombre d'acteurs qui sont aussi des producteurs :
@@ -245,7 +230,6 @@ Autre exemple pour compter le nombre d'acteurs qui sont aussi des producteurs :
 client
   .count({
     index: 'imdb',
-    type: 'actor',
     body: {
       query: {
         term: {
@@ -257,6 +241,6 @@ client
     }
   })
   .then(resp => {
-    console.log(resp.count);
+    console.log(resp.body.count);
   });
 ```

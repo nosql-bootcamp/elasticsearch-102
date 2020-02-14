@@ -1,11 +1,8 @@
-const elasticsearch = require('elasticsearch');
 const csv = require('csv-parser');
 const fs = require('fs');
+const { Client } = require('@elastic/elasticsearch');
 
-const client = new elasticsearch.Client({
-  host: 'localhost:9200',
-  log: 'info'
-});
+const client = new Client({ node: 'http://localhost:9200' });
 
 // Création de l'indice
 client.indices.create({ index: 'imdb' }, (err, resp) => {
@@ -28,7 +25,7 @@ fs
   .on('end', () => {
     client.bulk(createBulkInsertQuery(actors), (err, resp) => {
       if (err) console.trace(err.message);
-      else console.log(`Inserted ${resp.items.length} actors`);
+      else console.log(`Inserted ${resp.body.items.length} actors`);
       client.close();
     });
   });
@@ -37,7 +34,7 @@ fs
 function createBulkInsertQuery(actors) {
   const body = actors.reduce((acc, actor) => {
     const { name, birth_date } = actor;
-    acc.push({ index: { _index: 'imdb', _type: 'actor', _id: actor.imdb_id } })
+    acc.push({ index: { _index: 'imdb', _type: '_doc', _id: actor.imdb_id } })
     acc.push({ name, birth_date })
     return acc
   }, []);

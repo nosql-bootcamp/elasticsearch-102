@@ -2,14 +2,10 @@
   "name": "elasticsearch-102",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "csv-parser": "2.1.0",
-    "elasticsearch": "15.4.1"
+    "@elastic/elasticsearch": "^7.5.0",
+    "csv-parser": "^2.3.2"
   }
 }

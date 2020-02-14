@@ -1,10 +1,7 @@
-const elasticsearch = require('elasticsearch');
 const fs = require('fs');
+const { Client } = require('@elastic/elasticsearch');
 
-const client = new elasticsearch.Client({
-  host: 'localhost:9200',
-  log: 'info'
-});
+const client = new Client({ node: 'http://localhost:9200' });
 
 fs.readFile(
   './data/Top_1000_Actors_and_Actresses.json',
@@ -19,7 +16,7 @@ fs.readFile(
 
     client.bulk(createBulkUpdateQuery(actorsToUpdate), (err, resp) => {
       if (err) console.trace(err.message);
-      else console.log(`Updated ${resp.items.length} actors`);
+      else console.log(`Updated ${resp.body.items.length} actors`);
       client.close();
     });
   }
@@ -32,7 +29,7 @@ function createBulkUpdateQuery(actors) {
       image,
       occupation
     } = actor;
-    acc.push({ update: { _index: 'imdb', _type: 'actor', _id: actor.id } })
+    acc.push({ update: { _index: 'imdb', _type: '_doc', _id: actor.id } })
     acc.push({
       doc: {
         description: description.replace(
