@@ -53,7 +53,7 @@ Ces deux fichiers sont disponibles dans le dossier `src/data`.
 ## Driver natif ElasticSearch pour Node.js
 
 Les exemples de code du workshop se basent sur le [driver natif ElasticSearch pour Node.js](https://github.com/elastic/elasticsearch-js).
-La version utilisée est la [version 7.5.0](https://www.npmjs.com/package/@elastic/elasticsearch).
+La version utilisée est la [version 7.11.0](https://www.npmjs.com/package/@elastic/elasticsearch).
 
 L'avantage d'utiliser Node.js et le driver natif est que la syntaxe des requêtes du driver est quasiment identique à celles effectuées dans le shell.
 
